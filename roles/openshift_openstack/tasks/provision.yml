@@ -4,6 +4,12 @@
   when:
   - openshift_openstack_stack_state == 'present'
 
+- name: Get current nodes
+  meta: refresh_inventory
+
+- name: Get info about existing servers
+  os_server_facts:
+
 - name: Handle the Stack (create/delete)
   ignore_errors: False
   register: stack_create
@@ -13,8 +19,24 @@
     template: "{{ stack_template_path | default(omit) }}"
     wait: yes
 
-- name: Add the new nodes to the inventory
+# Here - getting all nodes will return all with the new one as well
+# before creating the stack, it would return only the previous ones
+# sooo difference of lists?
+
+- name: Set new_node to false for old servers
+  os_server:
+    name: "{{ item['name'] }}"
+    flavor: "{{ item['flavor']['id'] }}"
+    image: "{{ item['image']['id'] }}"
+    meta: "{{ item['metadata'] | combine({'new_node': 'false'}) }}"
+  with_items: "{{ openstack_servers }}"
+
+- name: Add only the newly added nodes to the new_nodes section
   meta: refresh_inventory
+
+#- debug: var=hostvars
+
+#- fail:
 
 - name: CleanUp
   include_tasks: cleanup.yml

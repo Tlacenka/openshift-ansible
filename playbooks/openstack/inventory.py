@@ -38,7 +38,11 @@ def base_openshift_inventory(cluster_hosts):
     cns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'cns']
 
-    nodes = list(set(masters + infra_hosts + app + cns))
+    new_nodes = [server.name for server in cluster_hosts
+                 if 'new_node' in server.metadata and
+                    server.metadata['new_node'] == 'true']
+
+    nodes = list(set(masters + infra_hosts + app + cns) - set(new_nodes))
 
     dns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'dns']
@@ -46,7 +50,7 @@ def base_openshift_inventory(cluster_hosts):
     load_balancers = [server.name for server in cluster_hosts
                       if server.metadata['host-type'] == 'lb']
 
-    osev3 = list(set(nodes + etcd + load_balancers))
+    osev3 = list(set(nodes + etcd + load_balancers + new_nodes))
 
     inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
     inventory['OSEv3'] = {'hosts': osev3}
@@ -55,6 +59,7 @@ def base_openshift_inventory(cluster_hosts):
     inventory['nodes'] = {'hosts': nodes}
     inventory['infra_hosts'] = {'hosts': infra_hosts}
     inventory['app'] = {'hosts': app}
+    inventory['new_nodes'] = {'hosts': new_nodes}
     inventory['glusterfs'] = {'hosts': cns}
     inventory['dns'] = {'hosts': dns}
     inventory['lb'] = {'hosts': load_balancers}

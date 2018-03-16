@@ -213,6 +213,10 @@ resources:
 {% if openshift_openstack_dns_nameservers %}
         openshift_hostname: { get_param: name }
 {% endif %}
+{% if openshift_scaling|default(False)|bool %}
+        new_node: true
+{% endif %}
+
       scheduler_hints: { get_param: scheduler_hints }
 
 {% if use_trunk_ports|default(false)|bool %}
