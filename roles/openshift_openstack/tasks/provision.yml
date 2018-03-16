@@ -19,10 +19,6 @@
     template: "{{ stack_template_path | default(omit) }}"
     wait: yes
 
-# Here - getting all nodes will return all with the new one as well
-# before creating the stack, it would return only the previous ones
-# sooo difference of lists?
-
 - name: Set new_node to false for old servers
   os_server:
     name: "{{ item['name'] }}"
@@ -33,10 +29,6 @@
 
 - name: Add only the newly added nodes to the new_nodes section
   meta: refresh_inventory
-
-#- debug: var=hostvars
-
-#- fail:
 
 - name: CleanUp
   include_tasks: cleanup.yml
