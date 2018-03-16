@@ -1,0 +1,29 @@
+---
+
+# Set how many nodes are to be added (1 by default)
+- hosts: localhost
+  tasks:
+  - name: Set how many nodes are to be added
+    set_fact:
+      increment_by: 1
+  - name: Check that the number corresponds to scaling up (not down)
+    assert:
+      that: 'increment_by | int >= 1'
+      msg: >
+        FAIL: The value of increment_by must be at least 1
+        (but it is {{ increment_by | int }}).
+  - name: Update openshit_openstack_num_nodes variable
+    set_fact:
+      openshift_openstack_num_nodes: 2
+      openshift_scaling: true
+
+- import_playbook: prerequisites.yml
+- import_playbook: provision.yml
+- import_playbook: ../../openshift-node/scaleup.yml
+
+- hosts: localhost
+  tasks:
+  - name: Get info about servers
+    os_server_facts:
+
+  - debug: var=openstack_servers
