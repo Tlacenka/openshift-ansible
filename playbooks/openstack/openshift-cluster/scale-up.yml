@@ -19,6 +19,23 @@
 
 - import_playbook: prerequisites.yml
 - import_playbook: provision.yml
+
+- hosts: new_nodes
+  tasks:
+  - import_role:
+      name: openshift_openstack
+      tasks_from: node-packages.yml
+  - import_role:
+      name: openshift_openstack
+      tasks_from: node-configuration.yml
+
+# Remove /etc/origin/master/session-secrets.yaml from master node
+# Then run ../../openshift-node/scaleup.yml playbook via ansible-playbook
+- hosts: all
+  tasks:
+  - fail:
+
+
 - import_playbook: ../../openshift-node/scaleup.yml
 
 - hosts: localhost
